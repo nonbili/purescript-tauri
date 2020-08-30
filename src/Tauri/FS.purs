@@ -1,5 +1,7 @@
 module Tauri.FS
   ( BaseDirectory(..)
+  , FsOptions
+  , FilePath
   , readTextFile
   , writeTextFile
   , readDir
@@ -61,6 +63,11 @@ type FsOptions =
   { dir :: Maybe BaseDirectory
   }
 
+type FsTextFileOption =
+  { path :: String
+  , contents :: String
+  }
+
 type FileEntry =
   { path :: String
   , name :: Maybe String
@@ -72,19 +79,20 @@ foreign import unsafeRequireFS :: forall r. Record r
 
 fs ::
   { readTextFile :: EffectFn2 FilePath Json (Promise String)
-  , writeFile :: EffectFn2 FilePath Json (Promise Unit)
+  , writeFile :: EffectFn2 FsTextFileOption Json (Promise Unit)
   , readDir :: EffectFn2 FilePath Json (Promise Json)
   }
 fs = unsafeRequireFS
 
-readTextFile :: String -> FsOptions -> Aff String
+readTextFile :: FilePath -> FsOptions -> Aff String
 readTextFile path opts = toAffE $ runEffectFn2 fs.readTextFile path (encodeJson opts)
 
-writeTextFile :: String -> FsOptions -> Aff Unit
-writeTextFile path opts = toAffE $ runEffectFn2 fs.writeFile path (encodeJson opts)
+writeTextFile :: FilePath -> String -> FsOptions -> Aff Unit
+writeTextFile path contents opts =
+  toAffE $ runEffectFn2 fs.writeFile { path, contents } (encodeJson opts)
 
 -- | Recursive not supported yet.
-readDir :: String -> FsOptions -> Aff (Array FileEntry)
+readDir :: FilePath -> FsOptions -> Aff (Array FileEntry)
 readDir path opts = do
   obj <- toAffE $ runEffectFn2 fs.readDir path (encodeJson opts)
   pure $ either (pure []) identity $ decodeJson obj
