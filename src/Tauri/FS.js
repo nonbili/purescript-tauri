@@ -1,1 +1,1 @@
-exports.unsafeRequireFS = require("tauri/api/fs");
+exports.fs = require("tauri/api/fs");

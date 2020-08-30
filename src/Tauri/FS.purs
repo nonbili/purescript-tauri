@@ -76,15 +76,12 @@ type FileEntry =
 
 type FilePath = String
 
-foreign import unsafeRequireFS :: forall r. Record r
-
-fs ::
+foreign import fs ::
   { readTextFile :: EffectFn2 FilePath Json (Promise String)
   , writeFile :: EffectFn2 FsTextFileOption Json (Promise Unit)
   , readDir :: EffectFn2 FilePath Json (Promise Json)
   , createDir :: EffectFn2 FilePath Json (Promise Unit)
   }
-fs = unsafeRequireFS
 
 readTextFile :: FilePath -> FsOptions -> Aff String
 readTextFile path opts = toAffE $ runEffectFn2 fs.readTextFile path (encodeJson opts)
