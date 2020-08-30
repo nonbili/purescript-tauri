@@ -1,0 +1,3 @@
+```
+spago build -w
+```
