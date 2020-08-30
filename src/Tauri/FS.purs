@@ -5,6 +5,7 @@ module Tauri.FS
   , readTextFile
   , writeTextFile
   , readDir
+  , createDir
   ) where
 
 import Prelude
@@ -81,6 +82,7 @@ fs ::
   { readTextFile :: EffectFn2 FilePath Json (Promise String)
   , writeFile :: EffectFn2 FsTextFileOption Json (Promise Unit)
   , readDir :: EffectFn2 FilePath Json (Promise Json)
+  , createDir :: EffectFn2 FilePath Json (Promise Unit)
   }
 fs = unsafeRequireFS
 
@@ -96,3 +98,8 @@ readDir :: FilePath -> FsOptions -> Aff (Array FileEntry)
 readDir path opts = do
   obj <- toAffE $ runEffectFn2 fs.readDir path (encodeJson opts)
   pure $ either (pure []) identity $ decodeJson obj
+
+-- | Recursive not supported yet.
+createDir :: FilePath -> FsOptions -> Aff Unit
+createDir path opts = do
+  toAffE $ runEffectFn2 fs.createDir path (encodeJson opts)
